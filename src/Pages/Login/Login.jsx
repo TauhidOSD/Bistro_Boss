@@ -1,29 +1,42 @@
-import { useEffect, useRef } from 'react';
-import { loadCaptchaEnginge, LoadCanvasTemplate, LoadCanvasTemplateNoReload, validateCaptcha } from 'react-simple-captcha';
+import { useContext, useEffect, useRef, useState } from "react";
+import {
+  loadCaptchaEnginge,
+  LoadCanvasTemplate,
+  validateCaptcha,
+} from "react-simple-captcha";
+import { AuthContext } from "../../provider/AuthProvider";
+import { Link } from "react-router-dom";
 
 const Login = () => {
+  const capchaRef = useRef(null);
+  const [disabled, setDisabled] = useState(true);
 
-    const capchaRef = useRef(null);
+  const { signIn } = useContext(AuthContext);
 
-    useEffect(() => {
-        loadCaptchaEnginge(6); 
+  useEffect(() => {
+    loadCaptchaEnginge(6);
+  }, []);
 
-    },[])
+  const handleLogin = (event) => {
+    event.preventDefault();
+    const form = event.target;
+    const email = form.email.value;
+    const password = form.password.value;
+    console.log(email, password);
+    signIn(email, password).then((result) => {
+      const user = result.user;
+      console.log(user);
+    });
+  };
 
-    const handleLogin =event =>{
-        event.preventDefault();
-        const form=event.target;
-        const email =form.email.value;
-        const password =form.password.value;
-        console.log(email,password);
+  const handleValidedCapture = () => {
+    const user_captcha_value = capchaRef.current.value;
+    if (validateCaptcha(user_captcha_value)) {
+      setDisabled(false);
+    } else {
+      setDisabled(true);
     }
-
-    const handleValidedCapture = () =>{
-
-        const value =capchaRef.current.value;
-        console.log(value);
-
-    }
+  };
 
   return (
     <div className="hero min-h-screen bg-base-200">
@@ -69,7 +82,7 @@ const Login = () => {
             </div>
             <div className="form-control">
               <label className="label">
-              <LoadCanvasTemplate />
+                <LoadCanvasTemplate />
               </label>
               <input
                 type="text"
@@ -79,12 +92,24 @@ const Login = () => {
                 className="input input-bordered"
                 required
               />
-              <button onClick={handleValidedCapture} className="btn btn-outline btn-xs mt-3">Validate</button>
+              <button
+                onClick={handleValidedCapture}
+                className="btn btn-outline btn-xs mt-3"
+              >
+                Validate
+              </button>
             </div>
             <div className="form-control mt-6">
-                <input  className="btn btn-primary"  type="submit" value="Login" />
+              <input
+                disabled={disabled}
+                className="btn btn-primary"
+                type="submit"
+                value="Login"
+              />
             </div>
           </form>
+          <p><small>New Here? 
+           <Link to="/signUp">Create an account</Link> </small></p>
         </div>
       </div>
     </div>
